@@ -13,6 +13,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using WebApi.Data;
+using WebApi.Interfaces;
+using WebApi.Services;
 
 namespace API
 {
@@ -28,11 +30,11 @@ namespace API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
-            services.AddControllers();
+            services.AddScoped<ITokenService,TokenService>();
             services.AddDbContext<ApplicationDataContext>(option => {
                  option.UseNpgsql(Configuration.GetConnectionString("DefaultString"));              
             });
+            services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebAPIv5", Version = "v1" });

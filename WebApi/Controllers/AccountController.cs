@@ -9,19 +9,23 @@ using Microsoft.EntityFrameworkCore;
 using WebApi.Data;
 using WebApi.DTOs;
 using WebApi.Entities;
+using WebApi.Interfaces;
 
 namespace WebApi.Controllers
 {
     public class AccountController:BaseApiController
     {
         private ApplicationDataContext _dbContext;
-        public AccountController(ApplicationDataContext dbContext)
+
+        private ITokenService _tokenServices;
+        public AccountController(ApplicationDataContext dbContext,ITokenService tokenService)
         {
             _dbContext = dbContext;
+            _tokenServices = tokenService;
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<AppUser>> Register(RegisterDto registerDto){
+        public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto){
 
             if(await userExists(registerDto.Username)) return BadRequest("User already exists");
             
@@ -36,9 +40,34 @@ namespace WebApi.Controllers
 
             _dbContext.Users.Add(user);
             await _dbContext.SaveChangesAsync();
-            return user;
+            return new UserDto{
+                Username = user.UserName,
+                Token = _tokenServices.CreateToken(user)
+            };
         }
 
+        [HttpPost("login")]
+        public async Task<ActionResult<UserDto>> Login(LoginDto login){
+
+            var user = await _dbContext.Users.SingleOrDefaultAsync(obj => obj.UserName == login.Username);
+
+            if(user == null)
+                return Unauthorized("Invalid User");
+            
+            using var hmac = new HMACSHA512(user.PasswordSalt);
+            
+            var computeHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(login.Password));
+
+            if(computeHash.Equals(user.PasswordHash))
+            
+                return new UserDto{
+                    Username = user.UserName,
+                    Token = _tokenServices.CreateToken(user)
+                };
+
+            return Unauthorized("Invalid User");
+
+        }
         private async Task<bool> userExists(string user){
 
             return await _dbContext.Users.AnyAsync(obj => obj.UserName == user.ToLower());
