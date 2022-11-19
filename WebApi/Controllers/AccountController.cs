@@ -58,15 +58,13 @@ namespace WebApi.Controllers
             
             var computeHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(login.Password));
 
-            if(computeHash.Equals(user.PasswordHash))
-            
-                return new UserDto{
-                    Username = user.UserName,
-                    Token = _tokenServices.CreateToken(user)
-                };
+            for(int i =0;i < computeHash.Length;i++)
+                if(computeHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid User");
 
-            return Unauthorized("Invalid User");
-
+            return new UserDto{
+                Username = user.UserName,
+                Token = _tokenServices.CreateToken(user)
+            };
         }
         private async Task<bool> userExists(string user){
 
