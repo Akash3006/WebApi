@@ -10,7 +10,7 @@ using WebApi.Entities;
 
 namespace WebApi.Controllers
 {
-    
+    [Authorize]//To Autthenticate the Controller only registered users can use this 
     public class UsersController:BaseApiController
     {
 
@@ -27,8 +27,7 @@ namespace WebApi.Controllers
             return users;
         }
 
-        //EndPoint
-        [Authorize]
+        //EndPoint        
         [HttpGet("{id}")]
         public async Task<ActionResult<AppUser>> GetUsers(int id){
             var user = await _dataContext.Users.FindAsync(id);             
