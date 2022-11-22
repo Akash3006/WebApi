@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Data;
 using WebApi.Entities;
+using WebApi.Interfaces;
 
 namespace WebApi.Controllers
 {
@@ -14,24 +15,24 @@ namespace WebApi.Controllers
     public class UsersController:BaseApiController
     {
 
-        private ApplicationDataContext _dataContext;
-        public UsersController(ApplicationDataContext dataContext){
+        private IUserRepository _userRepository;        
+        public UsersController(IUserRepository userRepository){
 
-            _dataContext = dataContext;
+            _userRepository = userRepository;
         }
 
         //EndPoint
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AppUser>>> GetUsers(){
-            var users  = await _dataContext.Users.ToListAsync();
-            return users;
+            //Get all users 
+            return Ok(await _userRepository.GetUsersAsync());
         }
 
         //EndPoint        
-        [HttpGet("{id}")]
-        public async Task<ActionResult<AppUser>> GetUsers(int id){
-            var user = await _dataContext.Users.FindAsync(id);             
-             return user;            
+        [HttpGet("{username}")]
+        public async Task<ActionResult<AppUser>> GetUsers(string username){
+
+            return await _userRepository.GetUserByNameAsync(username);           
         }
     }
 }
