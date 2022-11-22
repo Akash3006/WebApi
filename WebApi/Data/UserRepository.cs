@@ -28,7 +28,8 @@ namespace WebApi.Data
 
         public async Task<IEnumerable<AppUser>> GetUsersAsync()
         {
-            return await _context.Users.ToListAsync();
+            //Eager loading, fetching the child table  data 
+            return await _context.Users.Include(p=>p.Photos).ToListAsync();
         }
 
         public async Task<bool> SaveAllAsync()
