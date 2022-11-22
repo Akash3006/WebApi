@@ -2,7 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
+using WebApi.DTOs;
 using WebApi.Entities;
 using WebApi.Interfaces;
 
@@ -10,12 +13,31 @@ namespace WebApi.Data
 {
     public class UserRepository : IUserRepository
     {
+        private IMapper _mapper;
 
         private ApplicationDataContext _context;
-        public UserRepository(ApplicationDataContext context)
+        public UserRepository(ApplicationDataContext context,IMapper mapper)
         {
+            _mapper = mapper;
             _context = context;
         }
+
+        public async Task<AppUserDto> GetMappedUserAsync(String name)
+        {
+            //after optimization, making it queryable in databse 
+            return await _context.Users.
+                        Where(x=>x.UserName == name).
+                        ProjectTo<AppUserDto>(_mapper.ConfigurationProvider).
+                        SingleOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<AppUserDto>> GetMappedUsersAsync()
+        {
+            return await _context.Users.
+                ProjectTo<AppUserDto>(_mapper.ConfigurationProvider).
+                ToListAsync();
+        }
+
         public async Task<AppUser> GetUserById(int id)
         {
             return await _context.Users.FindAsync(id);

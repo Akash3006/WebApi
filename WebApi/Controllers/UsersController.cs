@@ -29,24 +29,30 @@ namespace WebApi.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<AppUserDto>>> GetUsers(){
 
-            var users = await _userRepository.GetUsersAsync();
+            // var users = await _userRepository.GetUsersAsync();
             
-            // Mapp all users object to userdto objects
-            var usersReponse = _mapper.Map<IEnumerable<AppUserDto>>(users);
+            // // Mapp all users object to userdto objects
+            // var usersReponse = _mapper.Map<IEnumerable<AppUserDto>>(users);
 
-            //Get all users 
-            return Ok(usersReponse);
+            // //Get all users 
+            // return Ok(usersReponse);
+
+            var users = await _userRepository.GetMappedUsersAsync();
+            return Ok(users);
         }
 
         //EndPoint        
         [HttpGet("{username}")]
-        public async Task<ActionResult<AppUser>> GetUsers(string username){
+        public async Task<ActionResult<AppUserDto>> GetUsers(string username){
 
-            var user = await _userRepository.GetUserByNameAsync(username);
+            // var user = await _userRepository.GetUserByNameAsync(username);
 
-            var response = _mapper.Map<AppUserDto>(user);
+            // var response = _mapper.Map<AppUserDto>(user);
 
-            return Ok(user);           
+            // return Ok(user);  
+
+            //after optimization, making it queryable in databse 
+            return await _userRepository.GetMappedUserAsync(username);         
         }
     }
 }
