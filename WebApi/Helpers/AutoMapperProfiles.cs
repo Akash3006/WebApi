@@ -19,6 +19,7 @@ namespace WebApi.Helpers
                 ForMember(dest=> dest.Age,opt=>opt.MapFrom(src=> src.DateOfBirth.CalculateAge()));
                 //To set age
             CreateMap<Photo,PhotoDto>();
+            CreateMap<MemberUpdateDto,AppUser>();
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -53,6 +54,23 @@ namespace WebApi.Controllers
 
             //after optimization, making it queryable in databse 
             return await _userRepository.GetMappedUserAsync(username);         
+        }
+
+        [HttpPut]
+        public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto){
+
+            var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var user = _userRepository.GetUserByNameAsync(username);
+
+            if(user == null) return NotFound();
+            
+            _mapper.Map(memberUpdateDto,user);
+            
+            if(await _userRepository.SaveAllAsync()) return NoContent();
+
+            return BadRequest();
+            
         }
     }
 }
