@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +23,7 @@ namespace WebApi.Data
             //after optimization, making it queryable in databse 
             return await _context.Users.
                         Where(x=>x.UserName == name).
+                        Include(p=>p.Photos).
                         ProjectTo<AppUserDto>(_mapper.ConfigurationProvider).
                         SingleOrDefaultAsync();
         }
@@ -34,6 +31,7 @@ namespace WebApi.Data
         public async Task<IEnumerable<AppUserDto>> GetMappedUsersAsync()
         {
             return await _context.Users.
+                Include(p=>p.Photos).
                 ProjectTo<AppUserDto>(_mapper.ConfigurationProvider).
                 ToListAsync();
         }
@@ -45,7 +43,9 @@ namespace WebApi.Data
 
         public async Task<AppUser> GetUserByNameAsync(string name)
         {
-            return await _context.Users.SingleOrDefaultAsync(x=> x.UserName == name);
+            return await _context.Users.
+                        Include(p=>p.Photos).
+                        SingleOrDefaultAsync(x=> x.UserName == name);
         }
 
         public async Task<IEnumerable<AppUser>> GetUsersAsync()
