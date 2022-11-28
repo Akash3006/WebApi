@@ -11,6 +11,7 @@ using WebApi.Data;
 using WebApi.DTOs;
 using WebApi.Entities;
 using WebApi.Interfaces;
+using WebApi.Extensions;
 
 namespace WebApi.Controllers
 {
@@ -19,11 +20,14 @@ namespace WebApi.Controllers
     {
 
         private IMapper _mapper;
-        private IUserRepository _userRepository;        
-        public UsersController(IUserRepository userRepository,IMapper mapper){
+        private IUserRepository _userRepository;
+
+        private IPhotoService _photoService;        
+        public UsersController(IUserRepository userRepository,IMapper mapper,IPhotoService photoService){
 
             _mapper = mapper;
             _userRepository = userRepository;
+            _photoService = photoService;
         }
 
         //EndPoint
@@ -59,7 +63,7 @@ namespace WebApi.Controllers
         [HttpPut]
         public async Task<ActionResult> UpdateUser(MemberUpdateDto memberUpdateDto){
 
-            var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var username = User.GetUserName();//Extension Method
 
             var user =  await _userRepository.GetUserByNameAsync(username);
 
@@ -73,6 +77,33 @@ namespace WebApi.Controllers
 
             return BadRequest();
             
+        }
+    
+        [HttpPost("add-photo")]
+        public async Task<ActionResult<PhotoDto>> UploadPhoto(IFormFile file)
+        {
+
+            var user = await _userRepository.GetUserByNameAsync(User.GetUserName());
+
+            if(user == null) return NotFound();
+
+            var result = await _photoService.AddPhotoAsycn(file);
+
+            if(result.Error!=null) return BadRequest(result.Error.Message);
+
+            var photo =  new Photo{
+                Url = result.SecureUrl.AbsoluteUri,
+                PublicId = result.PublicId
+            };
+
+            if(user.Photos.Count == 0) photo.IsMain =true;
+
+            user.Photos.Add(photo);
+
+            if(await _userRepository.SaveAllAsync()) return _mapper.Map<PhotoDto>(photo);
+
+            return BadRequest("Problem Adding Photo");
+
         }
     }
 }
