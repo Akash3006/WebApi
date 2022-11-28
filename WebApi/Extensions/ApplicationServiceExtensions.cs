@@ -20,7 +20,7 @@ namespace WebApi.Extensions
             services.AddDbContext<ApplicationDataContext>(option => {
                  option.UseNpgsql(config.GetConnectionString("DefaultString"));              
             });
-
+            services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
             return services;
         }
     }
