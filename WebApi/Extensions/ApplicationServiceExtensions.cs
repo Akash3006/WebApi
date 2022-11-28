@@ -17,6 +17,7 @@ namespace WebApi.Extensions
             services.AddScoped<ITokenService,TokenService>();
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
             services.AddScoped<IUserRepository,UserRepository>();
+            services.AddScoped<IPhotoService,PhotoService>();
             services.AddDbContext<ApplicationDataContext>(option => {
                  option.UseNpgsql(config.GetConnectionString("DefaultString"));              
             });
