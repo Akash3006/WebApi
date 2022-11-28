@@ -61,9 +61,11 @@ namespace WebApi.Controllers
 
             var username = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            var user = _userRepository.GetUserByNameAsync(username);
+            var user =  await _userRepository.GetUserByNameAsync(username);
 
             if(user == null) return NotFound();
+
+            // Console.Write(user);
             
             _mapper.Map(memberUpdateDto,user);
             
