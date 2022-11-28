@@ -48,7 +48,7 @@ namespace WebApi.Controllers
 
         //EndPoint        
         [HttpGet("{username}")]
-        public async Task<ActionResult<AppUserDto>> GetUsers(string username){
+        public async Task<ActionResult<AppUserDto>> GetUser(string username){
 
             // var user = await _userRepository.GetUserByNameAsync(username);
 
@@ -100,7 +100,11 @@ namespace WebApi.Controllers
 
             user.Photos.Add(photo);
 
-            if(await _userRepository.SaveAllAsync()) return _mapper.Map<PhotoDto>(photo);
+            if(await _userRepository.SaveAllAsync()){
+
+                //Get the end point location of the resource created
+                return CreatedAtAction(nameof(GetUser),new{username = user.UserName},_mapper.Map<PhotoDto>(photo));
+            }
 
             return BadRequest("Problem Adding Photo");
 
