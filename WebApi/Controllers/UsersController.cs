@@ -109,5 +109,39 @@ namespace WebApi.Controllers
             return BadRequest("Problem Adding Photo");
 
         }
+
+        [HttpPut("set-main-photo/{photoId}")]
+        public async Task<ActionResult> SetMainPhoto(int photoId){
+
+            //Get user
+            var user = await _userRepository.GetUserByNameAsync(User.GetUserName());
+
+            if(user == null) return NotFound();
+
+            //Get photo
+            var photo = user.Photos.FirstOrDefault(p=>p.Id == photoId);
+
+            if(photo == null) return NotFound();
+
+            //Check photo is defualt/main
+            if(photo.IsMain) return BadRequest("Photo is already set as default");
+
+            //Find out which photo is main
+            var currentPhoto = user.Photos.FirstOrDefault(p=>p.IsMain);
+            
+            //Mark it as not main or default photo
+            if(currentPhoto!=null)
+                currentPhoto.IsMain = false;
+            
+            //Make the other photo as default
+            photo.IsMain = true;
+
+            if(await _userRepository.SaveAllAsync()) return NoContent();
+
+            return BadRequest("Problem in setting the default photo");
+
+
+        }
+    
     }
 }
