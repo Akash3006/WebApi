@@ -143,12 +143,12 @@ namespace WebApi.Controllers
 
         }
 
-        [HttpDelete("delete-photo/publicId")]
-        public async Task<ActionResult> DeletePhoto(string publicId)
+        [HttpDelete("delete-photo/photoId")]
+        public async Task<ActionResult> DeletePhoto(int photoId)
         {
             var user = await _userRepository.GetUserByNameAsync(User.GetUserName());
 
-            var photo = user.Photos.FirstOrDefault(p=> p.PublicId == publicId);
+            var photo = user.Photos.FirstOrDefault(p=> p.Id == photoId);
 
             if(photo == null) return NotFound();
 
