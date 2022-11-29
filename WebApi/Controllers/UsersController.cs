@@ -142,6 +142,31 @@ namespace WebApi.Controllers
 
 
         }
+
+        [HttpDelete("delete-photo/publicId")]
+        public async Task<ActionResult> DeletePhoto(string publicId)
+        {
+            var user = await _userRepository.GetUserByNameAsync(User.GetUserName());
+
+            var photo = user.Photos.FirstOrDefault(p=> p.PublicId == publicId);
+
+            if(photo == null) return NotFound();
+
+            if(photo.IsMain) return BadRequest("Main photo can't be deleted");
+
+            if(photo.PublicId!=null)
+            {
+                var result = await _photoService.DeletePhotoAsync(photo.PublicId);
+
+                if(result.Error!= null) return BadRequest(result.Error.Message);    
+            }
+
+            user.Photos.Remove(photo);
+
+            if(await _userRepository.SaveAllAsync()) return Ok();
+
+            return BadRequest("Problem in deleting photo");
+        }
     
     }
 }

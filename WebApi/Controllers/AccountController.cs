@@ -49,7 +49,9 @@ namespace WebApi.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserDto>> Login(LoginDto login){
 
-            var user = await _dbContext.Users.SingleOrDefaultAsync(obj => obj.UserName == login.Username);
+            var user = await _dbContext.Users.
+            Include(p=>p.Photos).
+            SingleOrDefaultAsync(obj => obj.UserName == login.Username);
 
             if(user == null)
                 return Unauthorized("Invalid User");
@@ -63,6 +65,7 @@ namespace WebApi.Controllers
 
             return new UserDto{
                 Username = user.UserName,
+                PhotoUrl = user.Photos.FirstOrDefault(x=>x.IsMain).Url,
                 Token = _tokenServices.CreateToken(user)
             };
         }
