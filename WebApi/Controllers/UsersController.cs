@@ -143,7 +143,7 @@ namespace WebApi.Controllers
 
         }
 
-        [HttpDelete("delete-photo/photoId")]
+        [HttpDelete("delete-photo/{photoId}")]
         public async Task<ActionResult> DeletePhoto(int photoId)
         {
             var user = await _userRepository.GetUserByNameAsync(User.GetUserName());

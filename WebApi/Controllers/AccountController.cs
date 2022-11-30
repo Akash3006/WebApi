@@ -4,6 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Data;
@@ -16,10 +17,11 @@ namespace WebApi.Controllers
     public class AccountController:BaseApiController
     {
         private ApplicationDataContext _dbContext;
-
+        private IMapper _mapper;
         private ITokenService _tokenServices;
-        public AccountController(ApplicationDataContext dbContext,ITokenService tokenService)
+        public AccountController(ApplicationDataContext dbContext,ITokenService tokenService,IMapper mapper)
         {
+            _mapper = mapper;
             _dbContext = dbContext;
             _tokenServices = tokenService;
         }
@@ -29,20 +31,21 @@ namespace WebApi.Controllers
 
             if(await userExists(registerDto.Username)) return BadRequest("User already exists");
             
+            var user = _mapper.Map<AppUser>(registerDto);
+
             using var hmac = new HMACSHA512();
 
-            var user = new AppUser{
-                UserName = registerDto.Username.ToLower(),
-                PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password)),
-                PasswordSalt = hmac.Key
-                
-            };
+            user.UserName = registerDto.Username.ToLower();
+            user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password));
+            user.PasswordSalt = hmac.Key;
 
             _dbContext.Users.Add(user);
+
             await _dbContext.SaveChangesAsync();
             return new UserDto{
                 Username = user.UserName,
-                Token = _tokenServices.CreateToken(user)
+                Token = _tokenServices.CreateToken(user),
+                KnownAs = user.KnownAs
             };
         }
 
@@ -66,7 +69,8 @@ namespace WebApi.Controllers
             return new UserDto{
                 Username = user.UserName,
                 PhotoUrl = user.Photos.FirstOrDefault(x=>x.IsMain).Url,
-                Token = _tokenServices.CreateToken(user)
+                Token = _tokenServices.CreateToken(user),
+                KnownAs = user.KnownAs
             };
         }
         private async Task<bool> userExists(string user){
