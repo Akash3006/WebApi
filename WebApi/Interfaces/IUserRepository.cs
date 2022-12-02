@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WebApi.Entities;
 using WebApi.DTOs;
+using WebApi.Helpers;
 
 namespace WebApi.Interfaces
 {
@@ -15,7 +16,7 @@ namespace WebApi.Interfaces
         Task<AppUser> GetUserById(int id);
         Task<AppUser> GetUserByNameAsync(string name);
 
-        Task<IEnumerable<AppUserDto>> GetMappedUsersAsync();
+        Task<PagedList<AppUserDto>> GetMappedUsersAsync(UserParams userParams);
         Task<AppUserDto> GetMappedUserAsync(string name);
     }
 }

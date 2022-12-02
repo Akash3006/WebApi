@@ -3,6 +3,7 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.EntityFrameworkCore;
 using WebApi.DTOs;
 using WebApi.Entities;
+using WebApi.Helpers;
 using WebApi.Interfaces;
 
 namespace WebApi.Data
@@ -28,12 +29,29 @@ namespace WebApi.Data
                         SingleOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<AppUserDto>> GetMappedUsersAsync()
+        public async Task<PagedList<AppUserDto>> GetMappedUsersAsync(UserParams userParams)
         {
-            return await _context.Users.
-                Include(p=>p.Photos).
-                ProjectTo<AppUserDto>(_mapper.ConfigurationProvider).
-                ToListAsync();
+            // var queryUser = _context.Users.
+            //     Include(p=>p.Photos).
+            //     ProjectTo<AppUserDto>(_mapper.ConfigurationProvider).
+            //     AsNoTracking();
+
+            var query = _context.Users.AsQueryable();
+            var minDOB = DateOnly.FromDateTime(DateTime.Today.AddYears(-userParams.MaxAge-1));
+            var maxDOB = DateOnly.FromDateTime(DateTime.Today.AddYears(-userParams.MinAge));
+            
+            query = query.Where(x=> x.UserName!=userParams.CurrentUserName && x.Gender == userParams.Gender);   
+
+            //Order by 
+            query = userParams.OrderBy switch{
+                "created"=>query.OrderByDescending(u=> u.Created),
+                _=>query.OrderByDescending(u=>u.LastActive)
+            };         
+
+            return await PagedList<AppUserDto>.CreatePageAsync(
+                query.AsNoTracking().Include(p=>p.Photos).ProjectTo<AppUserDto>(_mapper.ConfigurationProvider),
+                userParams.PageNumber,
+                userParams.PageSize);
         }
 
         public async Task<AppUser> GetUserById(int id)

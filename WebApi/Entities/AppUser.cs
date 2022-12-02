@@ -29,8 +29,7 @@ namespace WebApi.Entities
         public string Country { get; set; }
         public ICollection<Photo> Photos { get; set; }
 
-        // public int GetAge(){
-        //     return DateOfBirth.CalculateAge();
-        // }
+        public List<UserLike> LikedBy { get; set; }
+        public List<UserLike> Liked { get; set; }
     }
 }

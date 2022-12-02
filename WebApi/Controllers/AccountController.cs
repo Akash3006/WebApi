@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -45,7 +41,8 @@ namespace WebApi.Controllers
             return new UserDto{
                 Username = user.UserName,
                 Token = _tokenServices.CreateToken(user),
-                KnownAs = user.KnownAs
+                KnownAs = user.KnownAs,
+                Gender = user.Gender
             };
         }
 
@@ -70,7 +67,8 @@ namespace WebApi.Controllers
                 Username = user.UserName,
                 PhotoUrl = user.Photos.FirstOrDefault(x=>x.IsMain).Url,
                 Token = _tokenServices.CreateToken(user),
-                KnownAs = user.KnownAs
+                KnownAs = user.KnownAs,
+                Gender = user.Gender
             };
         }
         private async Task<bool> userExists(string user){

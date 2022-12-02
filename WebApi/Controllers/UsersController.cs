@@ -1,17 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using WebApi.Data;
 using WebApi.DTOs;
 using WebApi.Entities;
 using WebApi.Interfaces;
 using WebApi.Extensions;
+using WebApi.Helpers;
 
 namespace WebApi.Controllers
 {
@@ -32,7 +26,7 @@ namespace WebApi.Controllers
 
         //EndPoint
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<AppUserDto>>> GetUsers(){
+        public async Task<ActionResult<PagedList<AppUserDto>>> GetUsers([FromQuery]UserParams userParams){
 
             // var users = await _userRepository.GetUsersAsync();
             
@@ -42,7 +36,18 @@ namespace WebApi.Controllers
             // //Get all users 
             // return Ok(usersReponse);
 
-            var users = await _userRepository.GetMappedUsersAsync();
+            var currentUser = await _userRepository.GetMappedUserAsync(User.GetUserName());
+
+            userParams.CurrentUserName = currentUser.Username;
+
+            if(String.IsNullOrEmpty(userParams.Gender))
+                {
+                    userParams.Gender = currentUser.Gender == "male"?"female":"male";
+                }
+            var users = await _userRepository.GetMappedUsersAsync(userParams);
+            
+            Response.AddPaginationHeader(new PaginationHeader(users.CurrentPage,users.PageSize,users.TotalCount,users.TotalPages));
+
             return Ok(users);
         }
 
