@@ -6,6 +6,7 @@ using AutoMapper;
 using WebApi.DTOs;
 using WebApi.Entities;
 using WebApi.Extensions;
+using WebApi.Interfaces;
 
 namespace WebApi.Helpers
 {
@@ -21,6 +22,9 @@ namespace WebApi.Helpers
             CreateMap<Photo,PhotoDto>();
             CreateMap<RegisterDto,AppUser>();
             CreateMap<MemberUpdateDto,AppUser>();
+            CreateMap<Message,MessageDto>()
+            .ForMember(d=>d.SenderPhotoUrl,s=>s.MapFrom(s=>s.Sender.Photos.FirstOrDefault(x=>x.IsMain).Url))
+            .ForMember(d=>d.RecipientPhotoUrl,s=>s.MapFrom(s=>s.Recipient.Photos.FirstOrDefault(x=>x.IsMain).Url));
         }
     }
 }

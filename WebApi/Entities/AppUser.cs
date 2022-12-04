@@ -31,5 +31,8 @@ namespace WebApi.Entities
 
         public List<UserLike> LikedBy { get; set; }
         public List<UserLike> Liked { get; set; }
+
+        public List<Message> MessagesSent { get; set; }
+        public List<Message> MessagesRecieved { get; set; }
     }
 }
